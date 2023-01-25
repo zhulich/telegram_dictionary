@@ -1,0 +1,8 @@
+# Telegram token
+API_TOKEN=YOUR TELEGRAM API TOKEN
+
+# MySQL settings
+USER_NAME=name
+PASSWORD=password
+DB_HOST=localhost
+DB_NAME=name
