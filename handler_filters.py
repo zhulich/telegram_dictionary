@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from telegram import Update
 from telegram.ext.filters import UpdateFilter
@@ -7,20 +8,12 @@ from config import commands
 
 class EnglishFilter(UpdateFilter):
     def filter(self, update: Update) -> bool:
-        alphabet = "abcdefghijklmnopqrstuvwxyz "
-        for letter in update.message.text:
-            if letter.lower() not in alphabet:
-                return False
-        return True
+        return bool(re.search("[a-zA-Z]", update.message.text))
 
 
 class UkraineFilter(UpdateFilter):
     def filter(self, update: Update) -> bool:
-        alphabet = "абвгґдеєжзиіїйклмнопрстуфхцчшщьюя "
-        for letter in update.message.text:
-            if letter.lower() not in alphabet:
-                return False
-        return True
+        return bool(re.search("[а-яА-Я]", update.message.text))
 
 
 class TimeHandler(UpdateFilter):
