@@ -81,9 +81,9 @@ def main():
     application.add_handler(
         MessageHandler(filters.Regex("Repeat words"), remind_highest_rating_words)
     )
-    application.add_handler(MessageHandler(filters.Regex("ukraine"), translate_from_uk))
+    application.add_handler(MessageHandler(filters.Regex("Ukraine"), translate_from_uk))
     application.add_handler(
-        MessageHandler(filters.Regex("english"), translate_from_eng)
+        MessageHandler(filters.Regex("English"), translate_from_eng)
     )
 
     application.add_handler(CommandHandler("start", start))

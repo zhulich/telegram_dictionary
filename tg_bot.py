@@ -1,7 +1,6 @@
 import logging
 import random
 from datetime import datetime, time
-
 import pytz
 from telegram import Update, ReplyKeyboardMarkup, Poll
 from telegram.ext import (
@@ -18,6 +17,7 @@ from cursors import (
     increase_rating,
     newest_words,
     get_all_eng_words,
+    reset_rating_job,
 )
 
 from translate import google_translate
@@ -31,8 +31,8 @@ logger = logging.getLogger(__name__)
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text="Hey, this bot created to help you learn and keep in mind some new words. "
-        "Use </info> command to see more information",
+        text="Hey, this bot was created to help you learn and keep in mind some new words. "
+        "Use </info> command to see more information.",
         reply_markup=ReplyKeyboardMarkup(buttons_start, resize_keyboard=True),
     )
 
@@ -40,7 +40,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def restart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text=f"Okay, lets go to main menu.",
+        text="Okay, let’s go to the Main menu.",
         reply_markup=ReplyKeyboardMarkup(buttons_start, resize_keyboard=True),
     )
 
@@ -49,12 +49,12 @@ async def info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
         text="Bot work only with english and ukraine languages.\n\n"
-        "It will give you 10 pairs of english and ukraine words at the 14:00, and remind its twice, "
-        "first time at 21:00 in the evening and second at 8:00 in the next morning.\n\n"
-        "<Setup daily events> change this time, just tap the button and bot will ask you new one.\n\n"
-        "<Add new word> starts conversation were will ask you input english and ukraine word, "
+        "It will give you 10 pairs of english and ukraine words at 14:00, and remind its twice, "
+        "first time at 21:00 in the evening and the second at 8:00 the next morning.\n\n"
+        "<Setup daily events> change this time, just tap the button and the bot will ask you for a new one.\n\n"
+        "<Add new word> starts a conversation where will ask you input english and ukraine word, "
         "after what save it to your dictionary.\n\n"
-        "Each day bot will increase value of words and reset it when you will repeat this words by "
+        "Each day bot will increase the value of words and reset it when you will repeat these words by "
         "<Repeat words> or <Get poll>\n\n"
         "<Repeat words> give you 5 pairs with highest value\n\n"
         "<Get poll> propose you poll with ukraine or english words to translate",
@@ -68,7 +68,7 @@ ENGLISH, UKRAINE = range(2)
 
 async def set_up_new_word(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Start of new conversation to set up new eng/uk pair"""
-    await update.message.reply_text("Hi, send me english word, that you want to save")
+    await update.message.reply_text("Hi, send me english word, that you want to save.")
     return ENGLISH
 
 
@@ -76,7 +76,7 @@ async def english(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.message.text
     context.user_data["english"] = query
     await update.message.reply_text(
-        "Okey, what is this word meaning in ukraine?",
+        "Okay, what is this word mean in ukraine?",
     )
 
     return UKRAINE
@@ -93,7 +93,7 @@ async def ukraine(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     )
     await add_new_pair(data)
     await update.message.reply_text(
-        "Ok, i will set up this pair into your dictionary",
+        "Okay, I will set up this pair in your dictionary.",
     )
 
     return ConversationHandler.END
@@ -101,10 +101,11 @@ async def ukraine(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Cancels and ends the conversation."""
-    await update.message.reply_text(
-        "Okay, lets go to main menu.", reply_markup=ReplyKeyboardMarkup(buttons_start)
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="Okay, let’s go to the Main menu.",
+        reply_markup=ReplyKeyboardMarkup(buttons_start, resize_keyboard=True),
     )
-
     return ConversationHandler.END
 
 
@@ -112,7 +113,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def choose_speech_part(context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(
         chat_id=context.job.chat_id,
-        text="Hye, it's time to lear some new words. Please choose what part of speech you want learn today.",
+        text="Hye, it's time to learn some new words. Please choose what part of the speech you want to learn today.",
         reply_markup=ReplyKeyboardMarkup(buttons_speech_parts),
     )
 
@@ -132,17 +133,13 @@ async def speech_part_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
     if update.message.text == commands[-1]:
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
-            text="Okay, lets go to main menu.",
+            text="Okay, lets go to Main menu.",
             reply_markup=ReplyKeyboardMarkup(buttons_start, resize_keyboard=True),
         )
 
     text = await google_translate(update.message.text, update.message.from_user.id)
     if len(text) < 10:
-        await context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text=text,
-            reply_markup=ReplyKeyboardMarkup(buttons_start, resize_keyboard=True),
-        )
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=text)
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
             text="Seems you reached the end of this speech part in my library.",
@@ -163,25 +160,29 @@ MORNING, EVENING, END = range(3)
 async def set_up_time_learn(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Start of conversation to set up time for all daily events"""
     await update.message.reply_text(
-        "Hi, write time, when you want learn new words in <hh:mm> format"
+        "Hi, write time, when you want to learn new words in <hh:mm> format."
     )
     return MORNING
 
 
-async def set_up_time_morning(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def set_up_time_morning(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
     query = update.message.text
     context.user_data["learn"] = datetime.strptime(query, "%H:%M").time()
     await update.message.reply_text(
-        "Now, write time, when you want repeat words in the morning in <hh:mm> format",
+        "Now, write the time, when you want to repeat words in the morning in <hh:mm> format.",
     )
     return EVENING
 
 
-async def set_up_time_evening(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def set_up_time_evening(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
     query = update.message.text
     context.user_data["morning"] = datetime.strptime(query, "%H:%M").time()
     await update.message.reply_text(
-        "Now, write time, when you want repeat words in the evening in <hh:mm> format",
+        "Now, write the time, when you want to repeat words in the evening in <hh:mm> format",
     )
     return END
 
@@ -276,7 +277,7 @@ async def remind_highest_rating_words(
 async def choose_poll(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(
         chat_id=update.message.chat_id,
-        text="Please choose, you want poll with UK or ENG word?",
+        text="Please choose, Do you want a poll with ukraine or english word?",
         reply_markup=ReplyKeyboardMarkup(buttons_poll, resize_keyboard=True),
     )
 
@@ -294,9 +295,9 @@ async def translate_from_uk(update: Update, context: ContextTypes.DEFAULT_TYPE):
     words_for_test.append(eng_word)
     random.shuffle(words_for_test)
     correct = words_for_test.index(eng_word)
+    question = f"Translate this word: {ua_word}."
 
-    question = f"Translate this word: {ua_word}"
-    context.job_queue.run_once(reset_rating, 1, data=(eng_word, ua_word, user_id))
+    context.job_queue.run_once(reset_rating_job, 1, data=(eng_word, ua_word, user_id))
     await context.bot.send_poll(
         chat_id=update.message.chat_id,
         question=question,
@@ -320,7 +321,7 @@ async def translate_from_eng(update: Update, context: ContextTypes.DEFAULT_TYPE)
     random.shuffle(words_for_test)
     correct = words_for_test.index(ua_word)
 
-    question = f"Translate this word: {eng_word}"
+    question = f"Translate this word: {eng_word}."
     context.job_queue.run_once(reset_rating, 1, data=(eng_word, ua_word, user_id))
     await context.bot.send_poll(
         chat_id=update.message.chat_id,

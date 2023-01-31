@@ -40,12 +40,12 @@ RATING_INCREASE = "UPDATE eng_ua SET rating = rating + 1"
 
 # Commands for choosing part of speech
 commands = [
-    "nouns",
-    "adverbs",
-    "adjectives",
-    "prepositions",
-    "verbs",
-    "compound-words",
+    "Nouns",
+    "Adverbs",
+    "Adjectives",
+    "Prepositions",
+    "Verbs",
+    "Compound-words",
     "Remind in 15 minutes",
     "Back to main menu",
 ]
@@ -66,7 +66,7 @@ buttons_speech_parts = [
     [KeyboardButton(commands[6]), KeyboardButton(commands[7])],
 ]
 buttons_poll = [
-    [KeyboardButton("ukraine")],
-    [KeyboardButton("english")],
+    [KeyboardButton("Ukraine")],
+    [KeyboardButton("English")],
     [KeyboardButton(commands[-1])],
 ]
