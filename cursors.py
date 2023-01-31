@@ -42,8 +42,15 @@ async def increase_rating():
     cursor.close()
 
 
-async def reset_rating(context: ContextTypes.DEFAULT_TYPE):
+async def reset_rating_job(context: ContextTypes.DEFAULT_TYPE):
     data = context.job.data
+    cursor = cnx.cursor()
+    cursor.execute(RATING_ZERO, data)
+    cnx.commit()
+    cursor.close()
+
+
+async def reset_rating(data):
     cursor = cnx.cursor()
     cursor.execute(RATING_ZERO, data)
     cnx.commit()
