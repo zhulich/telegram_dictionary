@@ -1,5 +1,3 @@
-from telegram.ext import ContextTypes
-
 from config import (
     cnx,
     SELECT_UA,
@@ -38,14 +36,6 @@ async def get_rating(data):
 async def increase_rating():
     cursor = cnx.cursor()
     cursor.execute(RATING_INCREASE)
-    cnx.commit()
-    cursor.close()
-
-
-async def reset_rating_job(context: ContextTypes.DEFAULT_TYPE):
-    data = context.job.data
-    cursor = cnx.cursor()
-    cursor.execute(RATING_ZERO, data)
     cnx.commit()
     cursor.close()
 
