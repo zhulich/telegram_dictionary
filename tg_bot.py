@@ -17,7 +17,6 @@ from cursors import (
     increase_rating,
     newest_words,
     get_all_eng_words,
-    reset_rating_job,
 )
 
 from translate import google_translate
@@ -297,7 +296,7 @@ async def translate_from_uk(update: Update, context: ContextTypes.DEFAULT_TYPE):
     correct = words_for_test.index(eng_word)
     question = f"Translate this word: {ua_word}."
 
-    context.job_queue.run_once(reset_rating_job, 1, data=(eng_word, ua_word, user_id))
+    await reset_rating((eng_word, ua_word, user_id))
     await context.bot.send_poll(
         chat_id=update.message.chat_id,
         question=question,
@@ -322,7 +321,7 @@ async def translate_from_eng(update: Update, context: ContextTypes.DEFAULT_TYPE)
     correct = words_for_test.index(ua_word)
 
     question = f"Translate this word: {eng_word}."
-    context.job_queue.run_once(reset_rating, 1, data=(eng_word, ua_word, user_id))
+    await reset_rating((eng_word, ua_word, user_id))
     await context.bot.send_poll(
         chat_id=update.message.chat_id,
         question=question,

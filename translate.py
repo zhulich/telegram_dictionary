@@ -7,7 +7,7 @@ from cursors import get_all_eng_words, add_new_pair
 
 
 def parse(command: str) -> list:
-    r = requests.get(random_words_url % (command,))
+    r = requests.get(random_words_url % (command.lower(),))
     return r.json()["data"]
 
 
